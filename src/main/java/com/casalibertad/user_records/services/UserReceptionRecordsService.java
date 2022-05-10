@@ -2,7 +2,6 @@ package com.casalibertad.user_records.services;
 
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +42,9 @@ public class UserReceptionRecordsService {
 	private PrisonEstablishmentService prisoEstablishmentService;
 	@Autowired
 	private UserService userService;
-	
+	@Autowired
+	private CrimeService crimeService;
+
 	public boolean isValidNewCourtRecordDTO(int userId, NewCourtRecordDTO courtRecordDTO) throws NotFoundException {
 		boolean isValid = true;
 
@@ -82,7 +83,7 @@ public class UserReceptionRecordsService {
 		return selectionRecordEntity != null;
 	}
 
-
+	
 	public boolean isValidNewUserCrimesDTO(int userId) throws NotFoundException, ConflictException {
 		
 		boolean isValid = true;
@@ -164,8 +165,26 @@ public class UserReceptionRecordsService {
 			userReceptionRecordsEntity.setActualProcess(userRecordsDTO.getActual_process());
 			
 			userReceptionRecordsRepository.save(userReceptionRecordsEntity);
+			
+			createUserCrimesEntities(userEntity.getUniqid(), userRecordsDTO.getCrimes());
 		}
 		
 		return userReceptionRecordsEntity;
+	}
+
+	
+	public void valideCrimeExistence(List<NewCrime> crimes) {
+		crimeService.valideCrimeExistence(crimes);
+	}
+
+	public List<UserCrimesEntity> createUserCrimesEntities(int userId, List<NewCrime> newCrimeDTO)
+			throws NotFoundException{
+		List<UserCrimesEntity> userCrimesEntities = null;
+		if(newCrimeDTO != null) {
+			valideCrimeExistence(newCrimeDTO);
+			userCrimesEntities =  userCrimesService.createUserCrimesEntities(userId, newCrimeDTO);
+		}
+		return userCrimesEntities;
+
 	}
 }

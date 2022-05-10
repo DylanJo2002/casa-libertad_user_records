@@ -8,4 +8,5 @@ import com.casalibertad.user_records.entities.CrimeEntity;
 @Repository
 public interface CrimeRepository extends JpaRepository<CrimeEntity, Integer> {
 	public CrimeEntity findByUniqid(int uniqid);
+	public CrimeEntity findByExternalUniqid(String id);
 }
