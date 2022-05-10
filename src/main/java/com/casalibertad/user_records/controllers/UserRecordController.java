@@ -1,5 +1,7 @@
 package com.casalibertad.user_records.controllers;
 
+import java.text.ParseException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.casalibertad.user_records.DTOS.NewUserRecordsDTO;
 import com.casalibertad.user_records.DTOS.UpdatedUserRecordsDTO;
 import com.casalibertad.user_records.DTOS.UserRecordsDTO;
+import com.casalibertad.user_records.exceptions.ConflictException;
+import com.casalibertad.user_records.exceptions.NotFoundException;
 import com.casalibertad.user_records.services.UserReceptionRecordsService;
 
 @RestController
@@ -28,7 +32,8 @@ public class UserRecordController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<UserRecordsDTO> createUserRecordsDTO(@RequestBody NewUserRecordsDTO newUserRecordsDTO){
+	public ResponseEntity<UserRecordsDTO> createUserRecordsDTO(@RequestBody NewUserRecordsDTO newUserRecordsDTO) throws NotFoundException, ConflictException, ParseException{
+		receptionRecordsService.createUserRecords(newUserRecordsDTO);
 		return null;
 	}
 	

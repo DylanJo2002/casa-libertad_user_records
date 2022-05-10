@@ -1,5 +1,8 @@
 package com.casalibertad.user_records.services;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,16 +16,19 @@ import com.casalibertad.user_records.entities.LegalStatusEntity;
 import com.casalibertad.user_records.entities.PrisonEstablishmentEntity;
 import com.casalibertad.user_records.entities.SelectionRecordEntity;
 import com.casalibertad.user_records.entities.UserCrimesEntity;
+import com.casalibertad.user_records.entities.UserEntity;
+import com.casalibertad.user_records.entities.UserReceptionRecordsEntity;
 import com.casalibertad.user_records.entities.UserRecordsEntity;
 import com.casalibertad.user_records.enums.ErrorMessageEnum;
 import com.casalibertad.user_records.exceptions.ConflictException;
 import com.casalibertad.user_records.exceptions.NotFoundException;
 import com.casalibertad.user_records.loggin.ExceptionLoggin;
+import com.casalibertad.user_records.repositories.UserReceptionRecordsRepository;
 
 @Service
 public class UserReceptionRecordsService {
 	@Autowired
-	private UserReceptionRecordsService userReceptionRecordsService;
+	private UserReceptionRecordsRepository userReceptionRecordsRepository;
 	@Autowired
 	private ExceptionLoggin exceptionLoggin;
 	@Autowired
@@ -35,7 +41,8 @@ public class UserReceptionRecordsService {
 	private LegalStatusService legalStatusService;
 	@Autowired
 	private PrisonEstablishmentService prisoEstablishmentService;
-	
+	@Autowired
+	private UserService userService;
 	
 	public boolean isValidNewCourtRecordDTO(int userId, NewCourtRecordDTO courtRecordDTO) throws NotFoundException {
 		boolean isValid = true;
@@ -94,19 +101,71 @@ public class UserReceptionRecordsService {
 		return isValid;
 	}
 
+	
 	public boolean isValidNewUserReceptionRecord(NewUserRecordsDTO newUserRecordsDTO) 
 			throws NotFoundException, ConflictException {
 		boolean isValid = true;
+		
+		UserEntity userEntity = userService.getUserEntity(newUserRecordsDTO.getUser_uniqid());
+		UserReceptionRecordsEntity userReceptionRecordsEntity = userReceptionRecordsRepository.findByUser(userEntity);
+
+		if(userReceptionRecordsEntity != null) {
+			String cause = String.format("There is already a User Reception Record for user whit id %d", newUserRecordsDTO.getUser_uniqid());
+			String id = exceptionLoggin.getUUID();
+			String message = exceptionLoggin.buildMessage(ErrorMessageEnum.ConflictException, id, cause
+					,this.getClass().toString());
+			exceptionLoggin.saveLog(message, id);
+			
+			throw new ConflictException(message);
+		}
+		
+		if(newUserRecordsDTO.getMonths_sentence() < 0) {
+			String cause = String.format("Months of sentence could not be %d", newUserRecordsDTO.getMonths_sentence());
+			String id = exceptionLoggin.getUUID();
+			String message = exceptionLoggin.buildMessage(ErrorMessageEnum.ConflictException, id, cause
+					,this.getClass().toString());
+			exceptionLoggin.saveLog(message, id);
+			
+			throw new ConflictException(message);
+		}
 		
 		boolean isValidCourtRecord = isValidNewCourtRecordDTO(newUserRecordsDTO.getUser_uniqid(),newUserRecordsDTO.getCourt_records_id());
 		boolean isValidCrimes = isValidNewUserCrimesDTO(newUserRecordsDTO.getUser_uniqid());
 		LegalStatusEntity legalStatusEntity = legalStatusService.getLegalStatusEntity(newUserRecordsDTO.getLegal_status_id());
 		PrisonEstablishmentEntity prisEntity = prisoEstablishmentService.getPrisonEstablishmentEntity(newUserRecordsDTO.getPrison_establishment_id());
-	
+		
 		if(legalStatusEntity == null || prisEntity == null) {
 			isValid = false;
 		}
 		
 		return isValid;
+	}
+
+	public UserReceptionRecordsEntity createUserRecords(NewUserRecordsDTO userRecordsDTO) throws NotFoundException, ConflictException, ParseException {
+		
+		UserReceptionRecordsEntity userReceptionRecordsEntity = null;
+		
+		if(isValidNewUserReceptionRecord(userRecordsDTO)) {
+			
+			userReceptionRecordsEntity = new UserReceptionRecordsEntity();
+			
+			UserEntity userEntity = userService.getUserEntity(userRecordsDTO.getUser_uniqid());
+			LegalStatusEntity legalStatusEntity = legalStatusService.getLegalStatusEntity(userRecordsDTO.getLegal_status_id());
+			PrisonEstablishmentEntity prisEntity = prisoEstablishmentService.getPrisonEstablishmentEntity(userRecordsDTO.getPrison_establishment_id());
+			
+			userReceptionRecordsEntity.setUser(userEntity);
+			userReceptionRecordsEntity.setFreedomDate(DateFormat.getDateInstance().parse((userRecordsDTO.getFreedom_date())));
+			userReceptionRecordsEntity.setMonthsSentence(userRecordsDTO.getMonths_sentence());
+			userReceptionRecordsEntity.setPrisonEstablishment(prisEntity);
+			userReceptionRecordsEntity.setOtherPrisonEstablishment(userRecordsDTO.getAnother_prison_establishment());
+			userReceptionRecordsEntity.setLegalStatus(legalStatusEntity);
+			userReceptionRecordsEntity.setApprehendedTeenager(userRecordsDTO.getApprehended_teenager());
+			userReceptionRecordsEntity.setApprehendedAdult(userRecordsDTO.getApprehended_adult());
+			userReceptionRecordsEntity.setActualProcess(userRecordsDTO.getActual_process());
+			
+			userReceptionRecordsRepository.save(userReceptionRecordsEntity);
+		}
+		
+		return userReceptionRecordsEntity;
 	}
 }
