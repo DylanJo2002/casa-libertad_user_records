@@ -10,5 +10,5 @@ import com.casalibertad.user_records.entities.UserRecordsEntity;
 
 @Repository
 public interface UserRecordRepository extends JpaRepository<UserRecordsEntity, Integer> {
-	public List<UserRecordsEntity> findByUser(UserEntity user);
+	public UserRecordsEntity findByUser(UserEntity user);
 }

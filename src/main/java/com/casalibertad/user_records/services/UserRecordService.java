@@ -1,6 +1,5 @@
 package com.casalibertad.user_records.services;
 
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,9 +17,10 @@ public class UserRecordService {
 	@Autowired
 	private UserRecordRepository recordRepository;
 	
-	public List<UserRecordsEntity> getUserRecordEntity(int userId) throws NotFoundException {
+	public UserRecordsEntity getUserRecordEntity(int userId) throws NotFoundException {
 		UserEntity userEntity = userService.getUserEntity(userId);
 		return recordRepository.findByUser(userEntity);		
 	}
+	
 
 }

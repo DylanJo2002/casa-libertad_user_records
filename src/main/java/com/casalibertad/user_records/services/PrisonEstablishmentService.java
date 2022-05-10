@@ -16,7 +16,7 @@ public class PrisonEstablishmentService {
 	@Autowired
 	private ExceptionLoggin exceptionLoggin;
 	
-	public PrisonEstablishmentEntity getLegalStatusEntity(int uniqid) throws NotFoundException{
+	public PrisonEstablishmentEntity getPrisonEstablishmentEntity(int uniqid) throws NotFoundException{
 		PrisonEstablishmentEntity prisonEstablishmentEntity = prisonEstablishmentRepository.findByUniqid(uniqid);
 		
 		if(prisonEstablishmentEntity == null) {
