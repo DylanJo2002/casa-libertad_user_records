@@ -34,7 +34,7 @@ public class UserReceptionRecordsEntity {
 	
 	@ManyToOne
 	@JoinColumn(name = "prison_establishment_id")
-	private PrisonEntablishmentEntity prisonEstablishment;
+	private PrisonEstablishmentEntity prisonEstablishment;
 	
 	@Column(name = "another_prison_establishment")
 	private String otherPrisonEstablishment;

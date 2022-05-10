@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "casa_libertad_prison_establishments")
-public class PrisonEntablishmentEntity {
+public class PrisonEstablishmentEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int uniqid;
