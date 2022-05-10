@@ -27,9 +27,7 @@ public class UserCrimesService {
 		return crimesRepository.findByUser(userEntity);
 	}
 	
-	public List<UserCrimesEntity> createUserCrimesEntities(int userId, List<NewCrime> newCrimeDTO) throws NotFoundException {
-		removeUserCrimesEntities(userId);
-		
+	public List<UserCrimesEntity> createUserCrimesEntities(int userId, List<NewCrime> newCrimeDTO) throws NotFoundException {		
 		UserEntity userEntity = userService.getUserEntity(userId);
 		List<UserCrimesEntity> userCrimesEntities = new ArrayList<UserCrimesEntity>();
 		

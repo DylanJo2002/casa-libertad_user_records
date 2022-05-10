@@ -39,7 +39,8 @@ public class UserRecordController {
 	
 	@PutMapping("/{user_id}")
 	public ResponseEntity<UserRecordsDTO> getUserRecordsDTO(@PathVariable int user_id,
-			@RequestBody UpdatedUserRecordsDTO updatedUserRecordsDTO){
+			@RequestBody UpdatedUserRecordsDTO updatedUserRecordsDTO) throws NotFoundException, ConflictException, ParseException{
+		receptionRecordsService.updateUserReceptionRecords(user_id, updatedUserRecordsDTO);
 		return null;
 	}
 	
