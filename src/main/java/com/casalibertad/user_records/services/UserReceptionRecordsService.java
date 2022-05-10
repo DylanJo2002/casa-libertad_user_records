@@ -84,6 +84,7 @@ public class UserReceptionRecordsService {
 	}
 
 	
+	
 	public boolean isValidNewUserCrimesDTO(int userId) throws NotFoundException, ConflictException {
 		
 		boolean isValid = true;
