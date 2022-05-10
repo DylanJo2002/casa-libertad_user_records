@@ -18,7 +18,7 @@ import com.casalibertad.user_records.DTOS.UserRecordsDTO;
 public class UserRecordController {
 	
 	@GetMapping("/{user_id}")
-	public ResponseEntity<UserRecordsDTO> getUserRecordsDTO(@PathVariable int userId){
+	public ResponseEntity<UserRecordsDTO> getUserRecordsDTO(@PathVariable int user_id){
 		return null;
 	}
 	
@@ -28,7 +28,7 @@ public class UserRecordController {
 	}
 	
 	@PutMapping("/{user_id}")
-	public ResponseEntity<UserRecordsDTO> getUserRecordsDTO(@PathVariable int userId,
+	public ResponseEntity<UserRecordsDTO> getUserRecordsDTO(@PathVariable int user_id,
 			@RequestBody UpdatedUserRecordsDTO updatedUserRecordsDTO){
 		return null;
 	}
