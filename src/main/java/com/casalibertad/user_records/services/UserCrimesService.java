@@ -5,22 +5,20 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.casalibertad.user_records.entities.UserCrimesEntity;
 import com.casalibertad.user_records.entities.UserEntity;
-import com.casalibertad.user_records.entities.UserRecordsEntity;
 import com.casalibertad.user_records.exceptions.NotFoundException;
-import com.casalibertad.user_records.repositories.UserRecordRepository;
+import com.casalibertad.user_records.repositories.UserCrimesRepository;
 
 @Service
-public class UserRecordService {
-	
+public class UserCrimesService {
 	@Autowired
 	private UserService userService;
 	@Autowired
-	private UserRecordRepository recordRepository;
+	private UserCrimesRepository crimesRepository;
 	
-	public List<UserRecordsEntity> getUserRecordEntity(int userId) throws NotFoundException {
+	public List<UserCrimesEntity> getUserCrimesEntities(int userId) throws NotFoundException{
 		UserEntity userEntity = userService.getUserEntity(userId);
-		return recordRepository.findByUser(userEntity);		
+		return crimesRepository.findByUser(userEntity);
 	}
-
 }
