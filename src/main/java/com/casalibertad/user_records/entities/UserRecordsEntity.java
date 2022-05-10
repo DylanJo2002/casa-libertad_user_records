@@ -23,10 +23,30 @@ public class UserRecordsEntity {
 	private UserEntity user;
 	
 	@ManyToOne
-	@JoinColumn(name = "court_record_uniqid")
-	private CourtRecordEntity record;
+	@JoinColumn(name = "record_policia_id")
+	private SelectionRecordEntity recordPolicia;
 	
 	@ManyToOne
-	@JoinColumn(name = "selection")
-	private SelectionRecordEntity selection;
+	@JoinColumn(name = "record_codigo_id")
+	private SelectionRecordEntity recordCodigo;
+	
+	@ManyToOne
+	@JoinColumn(name = "record_sisipec_id")
+	private SelectionRecordEntity recordSisipec;
+	
+	@ManyToOne
+	@JoinColumn(name = "record_personeria_id")
+	private SelectionRecordEntity recordPersoneria;
+	
+	@ManyToOne
+	@JoinColumn(name = "record_procuraduria_id")
+	private SelectionRecordEntity recordProcuraduria;
+	
+	@ManyToOne
+	@JoinColumn(name = "record_contraloria_id")
+	private SelectionRecordEntity recordContraloria;
+	
+	@ManyToOne
+	@JoinColumn(name = "record_rama_id")
+	private SelectionRecordEntity recordRama;
 }
