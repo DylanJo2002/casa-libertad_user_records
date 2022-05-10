@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@172.21.18.9:1521/pdb00016.lanbdpruebas.vcnlanglobalscj.oraclevcn.com
+    username: SICASALIBERTAD
+    password: CAS4LIBERTAd2020*
+    driver-class-name: oracle.jdbc.OracleDriver  jpa:    show-sql: true   
+ 
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  security:
+    user:      name: admin      password: 9a756023-7d7a-49ad-9b0b-544f35b53e5a 
+     
