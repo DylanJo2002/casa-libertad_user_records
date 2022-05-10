@@ -1,6 +1,5 @@
 package com.casalibertad.user_records.DTOS;
 
-import java.sql.Date;
 import java.util.List;
 
 import lombok.Data;
