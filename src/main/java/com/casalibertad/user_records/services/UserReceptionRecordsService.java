@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.casalibertad.user_records.DTOS.CrimeDTO;
 import com.casalibertad.user_records.DTOS.NewCourtRecordDTO;
 import com.casalibertad.user_records.DTOS.NewCrime;
 import com.casalibertad.user_records.DTOS.NewUserRecordsDTO;
@@ -45,20 +44,20 @@ public class UserReceptionRecordsService {
 	@Autowired
 	private CrimeService crimeService;
 
-	public boolean isValidNewCourtRecordDTO(int userId, NewCourtRecordDTO courtRecordDTO) throws NotFoundException {
+	public boolean isValidNewCourtRecordDTO(int userId, NewCourtRecordDTO courtRecordDTO) throws NotFoundException, ConflictException {
 		boolean isValid = true;
 
 		/*Valide if there is a court user record*/
 		UserRecordsEntity userRecordsEntity = userRecordService.getUserRecordEntity(userId);
 		
 		if(userRecordsEntity != null) {
-			String cause = String.format("Does not exist a User Court Record for user whit id %d", userId);
+			String cause = String.format("There is already an User Court Record for user with id %d", userId);
 			String id = exceptionLoggin.getUUID();
-			String message = exceptionLoggin.buildMessage(ErrorMessageEnum.NotFoundException, id, cause
+			String message = exceptionLoggin.buildMessage(ErrorMessageEnum.ConflictException, id, cause
 					,this.getClass().toString());
 			exceptionLoggin.saveLog(message, id);
 			
-			throw new NotFoundException(message);
+			throw new ConflictException(message);
 		}
 		
 		/*Valide if court record DTO is valid*/
@@ -168,6 +167,7 @@ public class UserReceptionRecordsService {
 			userReceptionRecordsRepository.save(userReceptionRecordsEntity);
 			
 			createUserCrimesEntities(userEntity.getUniqid(), userRecordsDTO.getCrimes());
+			userRecordService.createUserRecordEntity(userEntity.getUniqid(), userRecordsDTO.getCourt_records_id());
 		}
 		
 		return userReceptionRecordsEntity;

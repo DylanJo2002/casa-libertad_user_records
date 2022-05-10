@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.casalibertad.user_records.DTOS.CrimeDTO;
 import com.casalibertad.user_records.DTOS.NewCrime;
 import com.casalibertad.user_records.entities.CrimeEntity;
 import com.casalibertad.user_records.repositories.CrimeRepository;
