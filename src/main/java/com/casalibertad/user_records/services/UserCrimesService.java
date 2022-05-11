@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.casalibertad.user_records.DTOS.CrimeDTO;
 import com.casalibertad.user_records.DTOS.NewCrime;
 import com.casalibertad.user_records.entities.CrimeEntity;
 import com.casalibertad.user_records.entities.UserCrimesEntity;
@@ -51,5 +52,25 @@ public class UserCrimesService {
 	
 	public void removeUserCrimesEntities(int userId) {
 		crimesRepository.removeUserCrimes(userId);
+	}
+
+	public List<CrimeDTO> mapToCrimesDTO(UserEntity userEntity){
+		final List<CrimeDTO> crimeDTOs = new ArrayList<CrimeDTO>();
+		
+		List<UserCrimesEntity> userCrimesEntities = crimesRepository.findByUser(userEntity);
+		
+		if(userCrimesEntities.size() > 0) {
+			userCrimesEntities.forEach(userCrime -> {
+				CrimeEntity crimeEntity = userCrime.getCrime();
+				CrimeDTO crimeDTO = new CrimeDTO();
+				
+				crimeDTO.setCrime(crimeEntity.getCrime());
+				crimeDTO.setExternal_uniqid(crimeEntity.getExternalUniqid());
+				crimeDTO.setUniqid(crimeEntity.getUniqid());
+				
+				crimeDTOs.add(crimeDTO);
+			});
+		}
+		return crimeDTOs.size() == 0 ? null : crimeDTOs;
 	}
 }

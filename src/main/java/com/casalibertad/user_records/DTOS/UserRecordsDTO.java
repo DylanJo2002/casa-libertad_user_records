@@ -1,5 +1,6 @@
 package com.casalibertad.user_records.DTOS;
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.Data;
@@ -8,7 +9,7 @@ import lombok.Data;
 public class UserRecordsDTO {
 	private int user_uniqid;
 	private CourtRecordDTO courtRecords;
-	private String freedom_date;
+	private Date freedom_date;
 	private int months_sentence;
 	private PrisonEstablishmentDTO prison_establishment;
 	private String another_prison_establishment;

@@ -7,10 +7,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.casalibertad.user_records.DTOS.LegalStatusDTO;
 import com.casalibertad.user_records.DTOS.NewCourtRecordDTO;
 import com.casalibertad.user_records.DTOS.NewCrime;
 import com.casalibertad.user_records.DTOS.NewUserRecordsDTO;
+import com.casalibertad.user_records.DTOS.PrisonEstablishmentDTO;
 import com.casalibertad.user_records.DTOS.UpdatedUserRecordsDTO;
+import com.casalibertad.user_records.DTOS.UserRecordsDTO;
 import com.casalibertad.user_records.entities.LegalStatusEntity;
 import com.casalibertad.user_records.entities.PrisonEstablishmentEntity;
 import com.casalibertad.user_records.entities.SelectionRecordEntity;
@@ -299,5 +302,51 @@ public class UserReceptionRecordsService {
 				&& record_rama_id;
 				
 		return isValid;
+	}
+
+	public UserRecordsDTO mapToUserReceptionRecordDTO(UserReceptionRecordsEntity receptionRecordsEntity) {
+		
+		UserRecordsDTO userRecordsDTO = new UserRecordsDTO();
+		
+		if(receptionRecordsEntity != null) {
+			PrisonEstablishmentEntity establishmentEntity = receptionRecordsEntity.getPrisonEstablishment();
+			LegalStatusEntity legalStatusEntity = receptionRecordsEntity.getLegalStatus();
+			
+			LegalStatusDTO legalStatusDTO = new LegalStatusDTO();
+			PrisonEstablishmentDTO prisonEstablishmentDTO = new PrisonEstablishmentDTO();
+			
+			if(legalStatusEntity != null) {
+				legalStatusDTO.setUniqid(receptionRecordsEntity.getLegalStatus().getUniqid());
+				legalStatusDTO.setStatus(receptionRecordsEntity.getLegalStatus().getStatus());
+			}
+			
+			userRecordsDTO.setLegal_status(legalStatusDTO);
+
+			
+			if(establishmentEntity != null) {
+				prisonEstablishmentDTO.setUniqid(establishmentEntity.getUniqid());
+				prisonEstablishmentDTO.setPrison(establishmentEntity.getName());
+			}
+			
+			userRecordsDTO.setPrison_establishment(prisonEstablishmentDTO);
+			
+			userRecordsDTO.setUser_uniqid(receptionRecordsEntity.getUniqid());
+			userRecordsDTO.setFreedom_date(receptionRecordsEntity.getFreedomDate());
+			userRecordsDTO.setMonths_sentence(receptionRecordsEntity.getMonthsSentence());
+			userRecordsDTO.setAnother_prison_establishment(receptionRecordsEntity.getOtherPrisonEstablishment());
+			userRecordsDTO.setApprehended_teenager(receptionRecordsEntity.getApprehendedTeenager());
+			userRecordsDTO.setApprehended_adult(receptionRecordsEntity.getApprehendedAdult());
+			userRecordsDTO.setActual_process(receptionRecordsEntity.getActualProcess());
+			
+			userRecordsDTO.setCrimes(userCrimesService.mapToCrimesDTO(receptionRecordsEntity.getUser()));
+			userRecordsDTO.setCourtRecords(userRecordService.mapToCourtRecordDTO(receptionRecordsEntity.getUser()));
+		}
+		
+		return userRecordsDTO;
+	}
+
+	public UserRecordsDTO getUserReceptionRecordDTO(int user_id) throws NotFoundException {
+		UserEntity userEntity = userService.getUserEntity(user_id);
+		return mapToUserReceptionRecordDTO(userReceptionRecordsRepository.findByUser(userEntity));
 	}
 }

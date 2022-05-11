@@ -3,6 +3,7 @@ package com.casalibertad.user_records.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.casalibertad.user_records.DTOS.SelectionDTO;
 import com.casalibertad.user_records.entities.SelectionRecordEntity;
 import com.casalibertad.user_records.enums.ErrorMessageEnum;
 import com.casalibertad.user_records.exceptions.NotFoundException;
@@ -30,5 +31,14 @@ public class SelectionRecordService {
 		}
 		
 		return selectionRecordEntity;
+	}
+	
+	public SelectionDTO mapToSelectionDTO(SelectionRecordEntity entity) {
+		SelectionDTO selectionDTO = new SelectionDTO();
+		
+		selectionDTO.setSelection(entity.getSelection());
+		selectionDTO.setUniqid(entity.getUniqid());
+		
+		return selectionDTO;
 	}
 }

@@ -4,7 +4,9 @@ package com.casalibertad.user_records.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.casalibertad.user_records.DTOS.CourtRecordDTO;
 import com.casalibertad.user_records.DTOS.NewCourtRecordDTO;
+import com.casalibertad.user_records.DTOS.SelectionDTO;
 import com.casalibertad.user_records.entities.UserEntity;
 import com.casalibertad.user_records.entities.UserRecordsEntity;
 import com.casalibertad.user_records.enums.ErrorMessageEnum;
@@ -110,4 +112,32 @@ public class UserRecordService {
 			return recordRepository.save(userRecordsEntity);
 		}
 
+	public CourtRecordDTO mapToCourtRecordDTO(UserEntity userEntity) {
+		CourtRecordDTO courtRecordDTO = new CourtRecordDTO();
+		UserRecordsEntity userRecordsEntity = recordRepository.findByUser(userEntity);
+		
+		courtRecordDTO.setRecord_policia(selectionService.mapToSelectionDTO(
+				userRecordsEntity.getRecordPolicia()));
+		
+		courtRecordDTO.setRecord_codigo(selectionService.mapToSelectionDTO(
+				userRecordsEntity.getRecordCodigo()));
+		
+		courtRecordDTO.setRecord_sisipec(selectionService.mapToSelectionDTO(
+				userRecordsEntity.getRecordSisipec()));
+		
+		courtRecordDTO.setRecord_personeria(selectionService.mapToSelectionDTO(
+				userRecordsEntity.getRecordPersoneria()));
+		
+		courtRecordDTO.setRecord_procuraduria(selectionService.mapToSelectionDTO(
+				userRecordsEntity.getRecordProcuraduria()));
+		
+		courtRecordDTO.setRecord_contraloria(selectionService.mapToSelectionDTO(
+				userRecordsEntity.getRecordContraloria()));
+		
+		courtRecordDTO.setRecord_rama(selectionService.mapToSelectionDTO(
+				userRecordsEntity.getRecordRama()));
+		
+		
+		return courtRecordDTO;
+	}
 }
