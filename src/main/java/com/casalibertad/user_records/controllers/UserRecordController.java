@@ -44,8 +44,9 @@ public class UserRecordController {
 	@PutMapping("/{user_id}")
 	public ResponseEntity<UserRecordsDTO> getUserRecordsDTO(@PathVariable int user_id,
 			@RequestBody UpdatedUserRecordsDTO updatedUserRecordsDTO) throws NotFoundException, ConflictException, ParseException{
-		receptionRecordsService.updateUserReceptionRecords(user_id, updatedUserRecordsDTO);
-		return null;
+		UserRecordsDTO userRecordsDTO = 
+				receptionRecordsService.updateUserReceptionRecord(user_id,updatedUserRecordsDTO);
+		return new ResponseEntity<UserRecordsDTO>(userRecordsDTO, HttpStatus.OK);
 	}
 	
 }

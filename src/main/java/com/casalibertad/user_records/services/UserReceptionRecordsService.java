@@ -93,14 +93,14 @@ public class UserReceptionRecordsService {
 		
 		List<UserCrimesEntity> userCrimes = userCrimesService.getUserCrimesEntities(userId);
 		
-		if(userCrimes.size() > 0) {
-			String cause = String.format("There are already user crimes for user id %d", userId);
-			String id = exceptionLoggin.getUUID();
-			String message = exceptionLoggin.buildMessage(ErrorMessageEnum.ConflictException, id, cause
-					,this.getClass().toString());
-			exceptionLoggin.saveLog(message, id);
-			throw new ConflictException(message);
-		}
+//		if(userCrimes.size() > 0) {
+//			String cause = String.format("There are already user crimes for user id %d", userId);
+//			String id = exceptionLoggin.getUUID();
+//			String message = exceptionLoggin.buildMessage(ErrorMessageEnum.ConflictException, id, cause
+//					,this.getClass().toString());
+//			exceptionLoggin.saveLog(message, id);
+//			throw new ConflictException(message);
+//		}
 		
 		return isValid;
 	}
@@ -249,8 +249,18 @@ public class UserReceptionRecordsService {
 		
 		if(isValidUpdatedUserReceptionRecord(userId, updateUserRecordsDTO)) {
 			
-			LegalStatusEntity legalStatusEntity = legalStatusService.getLegalStatusEntity(updateUserRecordsDTO.getLegal_status_id());
-			PrisonEstablishmentEntity prisEntity = prisoEstablishmentService.getPrisonEstablishmentEntity(updateUserRecordsDTO.getPrison_establishment_id());
+			PrisonEstablishmentEntity prisEntity = null;
+			LegalStatusEntity legalStatusEntity = null;
+			
+			if(updateUserRecordsDTO.getPrison_establishment_id() != 0) {
+				prisEntity = prisoEstablishmentService.getPrisonEstablishmentEntity(
+						updateUserRecordsDTO.getPrison_establishment_id());
+			}
+			
+			if(updateUserRecordsDTO.getLegal_status_id() != 0) {
+				legalStatusEntity = legalStatusService.getLegalStatusEntity(
+						updateUserRecordsDTO.getLegal_status_id());
+			}
 			
 			userReceptionRecordsEntity.setUser(userEntity);
 			userReceptionRecordsEntity.setFreedomDate(DateFormat.getDateInstance().parse((updateUserRecordsDTO.getFreedom_date())));
@@ -264,7 +274,20 @@ public class UserReceptionRecordsService {
 			
 			userReceptionRecordsRepository.save(userReceptionRecordsEntity);
 			
+			removeUserCrimesEntities(userEntity.getUniqid());
+			
 			createUserCrimesEntities(userEntity.getUniqid(), updateUserRecordsDTO.getCrimes());
+			
+			if(updateUserRecordsDTO.getOther_crimes() != null) {
+				if(updateUserRecordsDTO.getOther_crimes().size() > 0) {
+					List<Integer> newCrimeIds = crimeService.createCrimes(
+							updateUserRecordsDTO.getOther_crimes());
+					
+					createUserCrimesEntities(userEntity.getUniqid(), 
+							newCrimeIds);
+				}
+			}
+			
 			userRecordService.updateUserRecordEntity(userId, updateUserRecordsDTO.getCourt_records_id());
 		}
 		
@@ -277,7 +300,9 @@ public class UserReceptionRecordsService {
 		
 		UserEntity userEntity = userService.getUserEntity(userId);
 		UserReceptionRecordsEntity userReceptionRecordsEntity = userReceptionRecordsRepository.findByUser(userEntity);
-
+		PrisonEstablishmentEntity prisEntity = null;
+		LegalStatusEntity legalStatusEntity = null;	
+		
 		if(userReceptionRecordsEntity == null) {
 			String cause = String.format("There is not a User Reception Record for user whit id %d", userId);
 			String id = exceptionLoggin.getUUID();
@@ -299,14 +324,24 @@ public class UserReceptionRecordsService {
 		}
 		
 		boolean isValidCourtRecord = isValidUpdatedCourtRecordDTO(userId,updateUserRecordsDTO.getCourt_records_id());
-		LegalStatusEntity legalStatusEntity = legalStatusService.getLegalStatusEntity(updateUserRecordsDTO.getLegal_status_id());
-		PrisonEstablishmentEntity prisEntity = prisoEstablishmentService.getPrisonEstablishmentEntity(updateUserRecordsDTO.getPrison_establishment_id());
+		boolean isValidCrimes = isValidNewUserCrimesDTO(userId)
+				&& crimeService.valideCrimeExistence(updateUserRecordsDTO.getCrimes());
+		boolean isValidNewCrimes = true;
 		
-		if(legalStatusEntity == null || prisEntity == null) {
-			isValid = false;
+		if(updateUserRecordsDTO.getOther_crimes() != null) {
+			isValidNewCrimes = crimeService.valideCrimeInexistence(updateUserRecordsDTO.getOther_crimes());
 		}
 		
-		return isValid;
+		if(updateUserRecordsDTO.getPrison_establishment_id() != 0) {
+			prisEntity = prisoEstablishmentService.getPrisonEstablishmentEntity(updateUserRecordsDTO.getPrison_establishment_id());
+		}
+		
+		if(updateUserRecordsDTO.getLegal_status_id() != 0) {
+			legalStatusEntity = legalStatusService.getLegalStatusEntity(updateUserRecordsDTO.getLegal_status_id());
+		}
+		
+		
+		return isValid & isValidCourtRecord & isValidCrimes & isValidNewCrimes;
 	}
 
 	
@@ -355,6 +390,7 @@ public class UserReceptionRecordsService {
 			PrisonEstablishmentDTO prisonEstablishmentDTO = null;
 			
 			if(legalStatusEntity != null) {
+				legalStatusDTO = new LegalStatusDTO();
 				legalStatusDTO.setUniqid(receptionRecordsEntity.getLegalStatus().getUniqid());
 				legalStatusDTO.setStatus(receptionRecordsEntity.getLegalStatus().getStatus());
 			}
@@ -363,6 +399,7 @@ public class UserReceptionRecordsService {
 
 			
 			if(establishmentEntity != null) {
+				prisonEstablishmentDTO = new PrisonEstablishmentDTO();
 				prisonEstablishmentDTO.setUniqid(establishmentEntity.getUniqid());
 				prisonEstablishmentDTO.setPrison(establishmentEntity.getName());
 			}
@@ -393,5 +430,11 @@ public class UserReceptionRecordsService {
 			throws NotFoundException, ConflictException, ParseException {
 		return mapToUserReceptionRecordDTO(
 				createUserRecords(userRecordsDTO));
+	}
+
+	public UserRecordsDTO updateUserReceptionRecord(int userId, UpdatedUserRecordsDTO userRecordsDTO) 
+			throws NotFoundException, ConflictException, ParseException {
+		return mapToUserReceptionRecordDTO(
+				updateUserReceptionRecords(userId, userRecordsDTO));
 	}
 }
