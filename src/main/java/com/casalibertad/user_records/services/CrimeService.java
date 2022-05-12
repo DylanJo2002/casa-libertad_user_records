@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.casalibertad.user_records.DTOS.CrimeDTO;
+import com.casalibertad.user_records.DTOS.CrimesDTO;
 import com.casalibertad.user_records.entities.CrimeEntity;
 import com.casalibertad.user_records.enums.ErrorMessageEnum;
 import com.casalibertad.user_records.exceptions.ConflictException;
@@ -84,5 +86,30 @@ public class CrimeService {
 			newCrimesIds.add(newCrime.getUniqid());
 		}
 		return newCrimesIds;
+	}
+	
+	public List<CrimeEntity> getCrimes(){
+		return crimeRepository.findAll();
+	}
+	
+	public CrimesDTO getCrimesDTO() {
+		CrimesDTO crimesDTO = new CrimesDTO();
+		crimesDTO.setCrimes(mapToCrimesDTO(getCrimes()));
+		return crimesDTO;
+	}
+	
+	public List<CrimeDTO> mapToCrimesDTO(List<CrimeEntity> crimes){
+		List<CrimeDTO> crimesDTO = new ArrayList<CrimeDTO>();
+		
+		if(crimes.size() > 0) {
+			for(CrimeEntity crime : crimes) {
+				CrimeDTO crimeDTO = new CrimeDTO();
+				crimeDTO.setUniqid(crime.getUniqid());
+				crimeDTO.setCrime(crime.getCrime());
+				crimesDTO.add(crimeDTO);
+			}
+		}
+		
+		return crimesDTO;
 	}
 }
