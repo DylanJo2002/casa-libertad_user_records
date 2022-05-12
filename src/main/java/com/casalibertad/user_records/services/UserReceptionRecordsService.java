@@ -351,8 +351,8 @@ public class UserReceptionRecordsService {
 			PrisonEstablishmentEntity establishmentEntity = receptionRecordsEntity.getPrisonEstablishment();
 			LegalStatusEntity legalStatusEntity = receptionRecordsEntity.getLegalStatus();
 			
-			LegalStatusDTO legalStatusDTO = new LegalStatusDTO();
-			PrisonEstablishmentDTO prisonEstablishmentDTO = new PrisonEstablishmentDTO();
+			LegalStatusDTO legalStatusDTO = null;
+			PrisonEstablishmentDTO prisonEstablishmentDTO = null;
 			
 			if(legalStatusEntity != null) {
 				legalStatusDTO.setUniqid(receptionRecordsEntity.getLegalStatus().getUniqid());
@@ -369,7 +369,7 @@ public class UserReceptionRecordsService {
 			
 			userRecordsDTO.setPrison_establishment(prisonEstablishmentDTO);
 			
-			userRecordsDTO.setUser_uniqid(receptionRecordsEntity.getUniqid());
+			userRecordsDTO.setUser_uniqid(receptionRecordsEntity.getUser().getUniqid());
 			userRecordsDTO.setFreedom_date(receptionRecordsEntity.getFreedomDate());
 			userRecordsDTO.setMonths_sentence(receptionRecordsEntity.getMonthsSentence());
 			userRecordsDTO.setAnother_prison_establishment(receptionRecordsEntity.getOtherPrisonEstablishment());
@@ -387,5 +387,11 @@ public class UserReceptionRecordsService {
 	public UserRecordsDTO getUserReceptionRecordDTO(int user_id) throws NotFoundException {
 		UserEntity userEntity = userService.getUserEntity(user_id);
 		return mapToUserReceptionRecordDTO(userReceptionRecordsRepository.findByUser(userEntity));
+	}
+	
+	public UserRecordsDTO createUserReceptionRecord(NewUserRecordsDTO userRecordsDTO) 
+			throws NotFoundException, ConflictException, ParseException {
+		return mapToUserReceptionRecordDTO(
+				createUserRecords(userRecordsDTO));
 	}
 }

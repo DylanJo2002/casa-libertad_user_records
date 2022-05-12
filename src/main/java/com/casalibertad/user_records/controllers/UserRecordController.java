@@ -36,8 +36,9 @@ public class UserRecordController {
 	
 	@PostMapping
 	public ResponseEntity<UserRecordsDTO> createUserRecordsDTO(@RequestBody NewUserRecordsDTO newUserRecordsDTO) throws NotFoundException, ConflictException, ParseException{
-		receptionRecordsService.createUserRecords(newUserRecordsDTO);
-		return null;
+		UserRecordsDTO userRecordsDTO = 
+				receptionRecordsService.createUserReceptionRecord(newUserRecordsDTO);
+		return new ResponseEntity<UserRecordsDTO>(userRecordsDTO, HttpStatus.CREATED);
 	}
 	
 	@PutMapping("/{user_id}")
