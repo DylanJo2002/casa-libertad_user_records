@@ -28,21 +28,24 @@ public class UserCrimesService {
 		return crimesRepository.findByUser(userEntity);
 	}
 	
-	public List<UserCrimesEntity> createUserCrimesEntities(int userId, List<NewCrime> newCrimeDTO) throws NotFoundException {		
+	public List<UserCrimesEntity> createUserCrimesEntities(int userId, List<Integer> newCrimeDTO) 
+			throws NotFoundException {		
 		UserEntity userEntity = userService.getUserEntity(userId);
+		
 		List<UserCrimesEntity> userCrimesEntities = new ArrayList<UserCrimesEntity>();
-		
-		
+	
 		newCrimeDTO.forEach(crime -> {
-				userCrimesEntities.add(createCrimeEntity(crime.getExternal_uniqid(), userEntity));
+			if(crime != 0) {
+				userCrimesEntities.add(createCrimeEntity(crime, userEntity));
+			}
 		});
 		
 		
 		return userCrimesEntities;
 	}
 	
-	public UserCrimesEntity createCrimeEntity(String crimeExternalId, UserEntity user) {
-		CrimeEntity crimeEntity = crimeService.getCrimeEntityByExternalId(crimeExternalId);
+	public UserCrimesEntity createCrimeEntity(int crimeUniqid, UserEntity user) {
+		CrimeEntity crimeEntity = crimeService.getCrimeEntity(crimeUniqid);
 		UserCrimesEntity userCrimesEntity = new UserCrimesEntity();
 		userCrimesEntity.setCrime(crimeEntity);
 		userCrimesEntity.setUser(user);
@@ -65,7 +68,6 @@ public class UserCrimesService {
 				CrimeDTO crimeDTO = new CrimeDTO();
 				
 				crimeDTO.setCrime(crimeEntity.getCrime());
-				crimeDTO.setExternal_uniqid(crimeEntity.getExternalUniqid());
 				crimeDTO.setUniqid(crimeEntity.getUniqid());
 				
 				crimeDTOs.add(crimeDTO);

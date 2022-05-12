@@ -10,5 +10,5 @@
             <package-name>org.springframework.*</package-name>
         </prefer-application-packages>
     </container-descriptor>
-    <context-root>casa-libertad</context-root>
+    <context-root>user_records</context-root>
 </weblogic-web-app>

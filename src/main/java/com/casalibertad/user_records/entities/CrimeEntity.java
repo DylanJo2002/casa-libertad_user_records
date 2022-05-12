@@ -16,8 +16,6 @@ public class CrimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int uniqid;
-	@Column(name = "external_uniqid", unique = true)
-	private String externalUniqid;
 	@Column(name = "crime")
 	private String crime;
 }

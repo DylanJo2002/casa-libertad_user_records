@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.casalibertad.user_records.DTOS.CrimeDTO;
 import com.casalibertad.user_records.DTOS.LegalStatusDTO;
 import com.casalibertad.user_records.DTOS.NewCourtRecordDTO;
 import com.casalibertad.user_records.DTOS.NewCrime;
@@ -110,7 +111,10 @@ public class UserReceptionRecordsService {
 		
 		UserEntity userEntity = userService.getUserEntity(newUserRecordsDTO.getUser_uniqid());
 		UserReceptionRecordsEntity userReceptionRecordsEntity = userReceptionRecordsRepository.findByUser(userEntity);
+		PrisonEstablishmentEntity prisEntity = null;
+		LegalStatusEntity legalStatusEntity = null;
 
+		
 		if(userReceptionRecordsEntity != null) {
 			String cause = String.format("There is already a User Reception Record for user whit id %d", newUserRecordsDTO.getUser_uniqid());
 			String id = exceptionLoggin.getUUID();
@@ -131,16 +135,28 @@ public class UserReceptionRecordsService {
 			throw new ConflictException(message);
 		}
 		
-		boolean isValidCourtRecord = isValidNewCourtRecordDTO(newUserRecordsDTO.getUser_uniqid(),newUserRecordsDTO.getCourt_records_id());
-		boolean isValidCrimes = isValidNewUserCrimesDTO(newUserRecordsDTO.getUser_uniqid());
-		LegalStatusEntity legalStatusEntity = legalStatusService.getLegalStatusEntity(newUserRecordsDTO.getLegal_status_id());
-		PrisonEstablishmentEntity prisEntity = prisoEstablishmentService.getPrisonEstablishmentEntity(newUserRecordsDTO.getPrison_establishment_id());
-		
-		if(legalStatusEntity == null || prisEntity == null) {
-			isValid = false;
+
+		boolean isValidCourtRecord = isValidNewCourtRecordDTO(newUserRecordsDTO.getUser_uniqid()
+				,newUserRecordsDTO.getCourt_records_id());
+				
+		boolean isValidCrimes = isValidNewUserCrimesDTO(newUserRecordsDTO.getUser_uniqid())
+				&& crimeService.valideCrimeExistence(newUserRecordsDTO.getCrimes());
+		boolean isValidNewCrimes = true;
+
+		if(newUserRecordsDTO.getOther_crimes() != null) {
+			isValidNewCrimes = crimeService.valideCrimeInexistence(newUserRecordsDTO.getOther_crimes());
 		}
 		
-		return isValid;
+		if(newUserRecordsDTO.getPrison_establishment_id() != 0) {
+			prisEntity = prisoEstablishmentService.getPrisonEstablishmentEntity(newUserRecordsDTO.getPrison_establishment_id());
+		}
+		
+		if(newUserRecordsDTO.getLegal_status_id() != 0) {
+			legalStatusEntity = legalStatusService.getLegalStatusEntity(newUserRecordsDTO.getLegal_status_id());
+		}
+		
+		
+		return isValid & isValidCourtRecord & isValidCrimes & isValidNewCrimes;
 	}
 
 	public UserReceptionRecordsEntity createUserRecords(NewUserRecordsDTO userRecordsDTO) throws NotFoundException, ConflictException, ParseException {
@@ -150,10 +166,18 @@ public class UserReceptionRecordsService {
 		if(isValidNewUserReceptionRecord(userRecordsDTO)) {
 			
 			userReceptionRecordsEntity = new UserReceptionRecordsEntity();
+			PrisonEstablishmentEntity prisEntity = null;
+			LegalStatusEntity legalStatusEntity = null;
 			
 			UserEntity userEntity = userService.getUserEntity(userRecordsDTO.getUser_uniqid());
-			LegalStatusEntity legalStatusEntity = legalStatusService.getLegalStatusEntity(userRecordsDTO.getLegal_status_id());
-			PrisonEstablishmentEntity prisEntity = prisoEstablishmentService.getPrisonEstablishmentEntity(userRecordsDTO.getPrison_establishment_id());
+			
+			if(userRecordsDTO.getPrison_establishment_id() != 0) {
+				prisEntity = prisoEstablishmentService.getPrisonEstablishmentEntity(userRecordsDTO.getPrison_establishment_id());
+			}
+			
+			if(userRecordsDTO.getLegal_status_id() != 0) {
+				legalStatusEntity = legalStatusService.getLegalStatusEntity(userRecordsDTO.getLegal_status_id());
+			}
 			
 			userReceptionRecordsEntity.setUser(userEntity);
 			userReceptionRecordsEntity.setFreedomDate(DateFormat.getDateInstance().parse((userRecordsDTO.getFreedom_date())));
@@ -167,22 +191,36 @@ public class UserReceptionRecordsService {
 			
 			userReceptionRecordsRepository.save(userReceptionRecordsEntity);
 			
+			removeUserCrimesEntities(userEntity.getUniqid());
+			
 			createUserCrimesEntities(userEntity.getUniqid(), userRecordsDTO.getCrimes());
+			
+			if(userRecordsDTO.getOther_crimes() != null) {
+				if(userRecordsDTO.getOther_crimes().size() > 0) {
+					List<Integer> newCrimeIds = crimeService.createCrimes(
+							userRecordsDTO.getOther_crimes());
+					
+					createUserCrimesEntities(userEntity.getUniqid(), 
+							newCrimeIds);
+				}
+			}
 			userRecordService.createUserRecordEntity(userEntity.getUniqid(), userRecordsDTO.getCourt_records_id());
 		}
 		
 		return userReceptionRecordsEntity;
 	}
 
-	public void valideCrimeExistence(List<NewCrime> crimes) {
+	public void valideCrimeExistence(List<Integer> crimes) throws NotFoundException {
 		crimeService.valideCrimeExistence(crimes);
 	}
 
-	public List<UserCrimesEntity> createUserCrimesEntities(int userId, List<NewCrime> newCrimeDTO)
+	public void removeUserCrimesEntities(int  userId) {
+		userCrimesService.removeUserCrimesEntities(userId);
+	}
+	
+	public List<UserCrimesEntity> createUserCrimesEntities(int userId, List<Integer> newCrimeDTO)
 			throws NotFoundException{
 		List<UserCrimesEntity> userCrimesEntities = null;
-
-		userCrimesService.removeUserCrimesEntities(userId);
 
 		if(newCrimeDTO != null) {
 			valideCrimeExistence(newCrimeDTO);
@@ -271,6 +309,7 @@ public class UserReceptionRecordsService {
 		return isValid;
 	}
 
+	
 	public boolean isValidUpdatedCourtRecordDTO(int userId, NewCourtRecordDTO courtRecordDTO) throws NotFoundException, ConflictException {
 		boolean isValid = true;
 

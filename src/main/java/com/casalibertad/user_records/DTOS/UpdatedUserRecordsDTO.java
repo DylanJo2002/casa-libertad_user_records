@@ -15,7 +15,8 @@ public class UpdatedUserRecordsDTO {
 	private int legal_status_id;
 	private int apprehended_teenager;
 	private int apprehended_adult;
-	private List<NewCrime> crimes;
+	private List<Integer> crimes;
+	private List<String> other_crimes;
 	private Character actual_process;
 	
 }
